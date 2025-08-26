@@ -1,0 +1,116 @@
+provider "aws" {
+  region = var.aws_region
+}
+
+# ---------------- Security Group for Jenkins ----------------
+resource "aws_security_group" "Preeti_jenkins_sg" {
+  name        = "Preeti-jenkins-sg"
+  description = "Allow SSH and Jenkins access"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ---------------- Security Group for Application Node ----------------
+resource "aws_security_group" "Preeti_app_sg" {
+  name        = "Preeti-app-sg"
+  description = "Allow SSH and Tomcat access"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ---------------- Jenkins Master EC2 ----------------
+resource "aws_instance" "Preeti_Jenkinsmaster" {
+  ami           = var.ami_id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  tags = {
+    Name = "Preeti_Jenkinsmaster"
+  }
+
+  security_groups = [aws_security_group.Preeti_jenkins_sg.name]
+}
+
+# ---------------- Application Node EC2 ----------------
+resource "aws_instance" "Preeti_applicationnoder" {
+  ami           = var.ami_id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  tags = {
+    Name = "Preeti_applicationnoder"
+  }
+
+  security_groups = [aws_security_group.Preeti_app_sg.name]
+}
+
+
+variable "aws_region" {
+  default = "eu-west-2"
+}
+
+variable "ami_id" {
+  default = "ami-046c2381f11878233"
+}
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+variable "key_name" {
+  default = "Preeti_key"
+}
+
+
+output "jenkins_public_ip" {
+  description = "Public IP of Jenkins Master"
+  value       = aws_instance.Preeti_Jenkinsmaster.public_ip
+}
+
+output "appnode_public_ip" {
+  description = "Public IP of Application Node"
+  value       = aws_instance.Preeti_applicationnoder.public_ip
+}
+
+
+
+
+
