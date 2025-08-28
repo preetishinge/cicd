@@ -1,0 +1,27 @@
+- name: Install and Configure Tomcat 9
+  hosts: app_servers
+  become: yes
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: yes
+
+    - name: Install Java
+      apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: Install Tomcat9
+      apt:
+        name: tomcat9
+        state: present
+
+    - name: Start Tomcat9
+      service:
+        name: tomcat9
+        state: started
+        enabled: yes
+
+
+[app_servers]
+preeti_applicationnode ansible_host=<app_node_ip> ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/preeti_key.pem
