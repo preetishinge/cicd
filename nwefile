@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/<your-username>/<your-repo>.git'
+            }
+        }
+
+        stage('Build with Maven') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                sh 'ansible-playbook install_tomcat.yml'
+                sh 'ansible all -i /etc/ansible/hosts -m copy -a "src=target/addressbook.war dest=/var/lib/tomcat9/webapps/addressbook.war"'
+            }
+        }
+    }
+}
